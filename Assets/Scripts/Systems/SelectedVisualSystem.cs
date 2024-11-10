@@ -19,7 +19,9 @@ namespace Systems
 
                     visualLocalTransform.ValueRW.Scale = selected.ValueRO.ShowScale;
                 }
-                else if (selected.ValueRO.OnDeselected) // it is possible have both onSelect and onDeselect in one frame in the event of re-selecting the same units
+                // else-if is important here - it is possible have both onSelect and
+                // onDeselect in one frame in the event of re-selecting the same units
+                else if (selected.ValueRO.OnDeselected)
                 {
                     var visualLocalTransform = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.VisualEntity);
 

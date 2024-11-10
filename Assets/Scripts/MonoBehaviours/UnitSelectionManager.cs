@@ -81,7 +81,6 @@ namespace MonoBehaviours
                     var physicsWorldSingleton = entityQuery.GetSingleton<PhysicsWorldSingleton>();
                     var collisionWorld = physicsWorldSingleton.CollisionWorld;
                     var cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    const int unitsLayer = 6;
                     var raycastInput = new RaycastInput
                     {
                         Start = cameraRay.GetPoint(0f),
@@ -90,7 +89,7 @@ namespace MonoBehaviours
                         {
                             GroupIndex = 0,
                             BelongsTo = ~0u, // flipping 0 with ~ results in every bit being set
-                            CollidesWith = 1u << unitsLayer, // bit-shift by the layer number
+                            CollidesWith = 1u << GameAssets.UnitsLayer, // bit-shift by the layer number
                         },
                     };
                     if (collisionWorld.CastRay(raycastInput, out var raycastHit))

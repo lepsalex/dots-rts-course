@@ -28,6 +28,14 @@ PrefabInstance:
       propertyPath: faction
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2071132403048886252, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
+      propertyPath: range
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2071132403048886252, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
+      propertyPath: targetFaction
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2948479828102178147, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       propertyPath: m_Mesh
       value: 
