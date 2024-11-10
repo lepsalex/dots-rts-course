@@ -14,14 +14,7 @@ namespace Authoring
             public override void Bake(UnitMoverAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent(
-                    entity,
-                    new UnitMover
-                    {
-                        MoveSpeed = authoring.moveSpeed,
-                        RotationSpeed = authoring.rotationSpeed,
-                    }
-                );
+                AddComponent(entity, new UnitMover { MoveSpeed = authoring.moveSpeed, RotationSpeed = authoring.rotationSpeed });
             }
         }
     }

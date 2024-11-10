@@ -95,7 +95,7 @@ namespace MonoBehaviours
                     };
                     if (collisionWorld.CastRay(raycastInput, out var raycastHit))
                     {
-                        if (entityManager.HasComponent<Unit>(raycastHit.Entity))
+                        if (entityManager.HasComponent<Unit>(raycastHit.Entity) && entityManager.HasComponent<Selected>(raycastHit.Entity))
                         {
                             entityManager.SetComponentEnabled<Selected>(raycastHit.Entity, true);
                             var selected = entityManager.GetComponentData<Selected>(raycastHit.Entity);
