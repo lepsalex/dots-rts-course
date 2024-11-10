@@ -3,8 +3,15 @@ using Unity.Entities;
 
 namespace Systems
 {
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     partial struct HealthDeathTestSystem : ISystem
     {
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {

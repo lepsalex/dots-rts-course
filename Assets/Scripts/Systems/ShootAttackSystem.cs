@@ -1,5 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Systems
@@ -9,7 +11,9 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (shootAttack, target) in SystemAPI.Query<RefRW<ShootAttack>, RefRO<Target>>())
+            var entitiesReferences = SystemAPI.GetSingleton<EntitiesReferences>();
+
+            foreach (var (localTransform, shootAttack, target) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<ShootAttack>, RefRO<Target>>())
             {
                 if (target.ValueRO.TargetEntity == Entity.Null)
                     continue;
@@ -24,10 +28,17 @@ namespace Systems
                 // reset shoot attack timer
                 shootAttack.ValueRW.Timer = shootAttack.ValueRO.TimerMax;
 
-                // shoot attack the target
-                var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.TargetEntity);
-                int damageAmount = 1;
-                targetHealth.ValueRW.CurrentHealth -= damageAmount;
+                // spawn a bullet
+                var bulletEntity = state.EntityManager.Instantiate(entitiesReferences.BulletPrefabEntity);
+                SystemAPI.SetComponent(bulletEntity, LocalTransform.FromPosition(localTransform.ValueRO.Position + new float3(0f, 2f, 0f)));
+
+                // set bullet damage to attack damage
+                var bulletBullet = SystemAPI.GetComponentRW<Bullet>(bulletEntity);
+                bulletBullet.ValueRW.DamageAmount = shootAttack.ValueRO.DamageAmount;
+
+                // set bullet target to attack target
+                var bulletTarget = SystemAPI.GetComponentRW<Target>(bulletEntity);
+                bulletTarget.ValueRW.TargetEntity = target.ValueRO.TargetEntity;
             }
         }
     }
