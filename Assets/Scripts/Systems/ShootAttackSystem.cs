@@ -25,7 +25,9 @@ namespace Systems
                 shootAttack.ValueRW.Timer = shootAttack.ValueRO.TimerMax;
 
                 // shoot attack the target
-                Debug.Log("SHOOT");
+                var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.TargetEntity);
+                int damageAmount = 1;
+                targetHealth.ValueRW.CurrentHealth -= damageAmount;
             }
         }
     }
