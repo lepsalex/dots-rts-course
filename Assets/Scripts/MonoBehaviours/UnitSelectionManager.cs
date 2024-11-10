@@ -38,9 +38,14 @@ namespace MonoBehaviours
                 var entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Selected>().Build(entityManager);
 
                 var entities = entityQuery.ToEntityArray(Allocator.Temp);
-                foreach (var entity in entities)
+                var selectedArr = entityQuery.ToComponentDataArray<Selected>(Allocator.Temp);
+                for (var i = 0; i < entities.Length; i++)
                 {
-                    entityManager.SetComponentEnabled<Selected>(entity, false);
+                    entityManager.SetComponentEnabled<Selected>(entities[i], false);
+                    var selected = selectedArr[i];
+                    selected.OnDeselected = true;
+                    selectedArr[i] = selected;
+                    entityManager.SetComponentData(entities[i], selected);
                 }
 
                 // get selectionAreaRect and check if we should select
@@ -63,6 +68,9 @@ namespace MonoBehaviours
                         if (selectionAreaRect.Contains(unitScreenPosition))
                         {
                             entityManager.SetComponentEnabled<Selected>(entities[i], true);
+                            var selected = entityManager.GetComponentData<Selected>(entities[i]);
+                            selected.OnSelected = true;
+                            entityManager.SetComponentData(entities[i], selected);
                         }
                     }
                 }
@@ -90,6 +98,9 @@ namespace MonoBehaviours
                         if (entityManager.HasComponent<Unit>(raycastHit.Entity))
                         {
                             entityManager.SetComponentEnabled<Selected>(raycastHit.Entity, true);
+                            var selected = entityManager.GetComponentData<Selected>(raycastHit.Entity);
+                            selected.OnSelected = true;
+                            entityManager.SetComponentData(raycastHit.Entity, selected);
                         }
                     }
                 }

@@ -15,14 +15,7 @@ namespace Authoring
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(
                     entity,
-                    new Selected
-                    {
-                        VisualEntity = GetEntity(
-                            authoring.visualGameObject,
-                            TransformUsageFlags.Dynamic
-                        ),
-                        ShowScale = authoring.showScale,
-                    }
+                    new Selected { VisualEntity = GetEntity(authoring.visualGameObject, TransformUsageFlags.Dynamic), ShowScale = authoring.showScale }
                 );
                 SetComponentEnabled<Selected>(entity, false);
             }
@@ -34,4 +27,8 @@ public struct Selected : IComponentData, IEnableableComponent
 {
     public Entity VisualEntity;
     public float ShowScale;
+
+    // DOTS events approach
+    public bool OnSelected;
+    public bool OnDeselected;
 }

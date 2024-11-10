@@ -4,25 +4,27 @@ using Unity.Transforms;
 
 namespace Systems
 {
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
+    [UpdateBefore(typeof(ResetEventsSystem))]
     partial struct SelectedVisualSystem : ISystem
     {
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var selected in SystemAPI.Query<RefRO<Selected>>().WithDisabled<Selected>())
+            foreach (var selected in SystemAPI.Query<RefRO<Selected>>().WithPresent<Selected>())
             {
-                var visualLocalTransform = SystemAPI.GetComponentRW<LocalTransform>(
-                    selected.ValueRO.VisualEntity
-                );
-                visualLocalTransform.ValueRW.Scale = 0f;
-            }
+                if (selected.ValueRO.OnSelected)
+                {
+                    var visualLocalTransform = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.VisualEntity);
 
-            foreach (var selected in SystemAPI.Query<RefRO<Selected>>())
-            {
-                var visualLocalTransform = SystemAPI.GetComponentRW<LocalTransform>(
-                    selected.ValueRO.VisualEntity
-                );
-                visualLocalTransform.ValueRW.Scale = selected.ValueRO.ShowScale;
+                    visualLocalTransform.ValueRW.Scale = selected.ValueRO.ShowScale;
+                }
+                else if (selected.ValueRO.OnDeselected) // it is possible have both onSelect and onDeselect in one frame in the event of re-selecting the same units
+                {
+                    var visualLocalTransform = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.VisualEntity);
+
+                    visualLocalTransform.ValueRW.Scale = 0f;
+                }
             }
         }
     }
