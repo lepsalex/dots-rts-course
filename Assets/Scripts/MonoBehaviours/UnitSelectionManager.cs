@@ -1,6 +1,7 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -33,7 +34,7 @@ namespace MonoBehaviours
             {
                 var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-                // get all selected entities to reset their selected status to false
+                // deselect previously selected units
                 var entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Selected>().Build(entityManager);
 
                 var entities = entityQuery.ToEntityArray(Allocator.Temp);
@@ -42,22 +43,54 @@ namespace MonoBehaviours
                     entityManager.SetComponentEnabled<Selected>(entity, false);
                 }
 
-                // Looks for units that are selectable
-                entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<LocalTransform, Unit>().WithPresent<Selected>().Build(entityManager);
-
-                entities = entityQuery.ToEntityArray(Allocator.Temp);
-                var localTransforms = entityQuery.ToComponentDataArray<LocalTransform>(Allocator.Temp);
-
-                // cache selectionAreaRect
+                // get selectionAreaRect and check if we should select
                 var selectionAreaRect = GetSelectionAreaRect();
+                var selectionAreaSize = selectionAreaRect.width + selectionAreaRect.height;
+                var multiSelectSizeMin = 40f;
 
-                for (var i = 0; i < localTransforms.Length; i++)
+                if (selectionAreaSize > multiSelectSizeMin)
                 {
-                    var unitLocalTransform = localTransforms[i];
-                    var unitScreenPosition = Camera.main.WorldToScreenPoint(unitLocalTransform.Position);
-                    if (selectionAreaRect.Contains(unitScreenPosition))
+                    // Multi-select Logic
+                    entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<LocalTransform, Unit>().WithPresent<Selected>().Build(entityManager);
+
+                    entities = entityQuery.ToEntityArray(Allocator.Temp);
+                    var localTransforms = entityQuery.ToComponentDataArray<LocalTransform>(Allocator.Temp);
+
+                    for (var i = 0; i < localTransforms.Length; i++)
                     {
-                        entityManager.SetComponentEnabled<Selected>(entities[i], true);
+                        var unitLocalTransform = localTransforms[i];
+                        var unitScreenPosition = Camera.main.WorldToScreenPoint(unitLocalTransform.Position);
+                        if (selectionAreaRect.Contains(unitScreenPosition))
+                        {
+                            entityManager.SetComponentEnabled<Selected>(entities[i], true);
+                        }
+                    }
+                }
+                else
+                {
+                    // Single select logic
+                    entityQuery = entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
+                    var physicsWorldSingleton = entityQuery.GetSingleton<PhysicsWorldSingleton>();
+                    var collisionWorld = physicsWorldSingleton.CollisionWorld;
+                    var cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    const int unitsLayer = 6;
+                    var raycastInput = new RaycastInput
+                    {
+                        Start = cameraRay.GetPoint(0f),
+                        End = cameraRay.GetPoint(9999f),
+                        Filter = new CollisionFilter
+                        {
+                            GroupIndex = 0,
+                            BelongsTo = ~0u, // flipping 0 with ~ results in every bit being set
+                            CollidesWith = 1u << unitsLayer, // bit-shift by the layer number
+                        },
+                    };
+                    if (collisionWorld.CastRay(raycastInput, out var raycastHit))
+                    {
+                        if (entityManager.HasComponent<Unit>(raycastHit.Entity))
+                        {
+                            entityManager.SetComponentEnabled<Selected>(raycastHit.Entity, true);
+                        }
                     }
                 }
 
