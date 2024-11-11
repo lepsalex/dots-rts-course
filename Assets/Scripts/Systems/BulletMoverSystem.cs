@@ -22,8 +22,8 @@ namespace Systems
 
             foreach (var (localTransform, bullet, target, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRO<Bullet>, RefRO<Target>>().WithEntityAccess())
             {
-                // target null check + local transform missing check (seems to be a bug in Unity)
-                if (target.ValueRO.TargetEntity == Entity.Null || !SystemAPI.HasComponent<LocalTransform>(target.ValueRO.TargetEntity))
+                // target null check
+                if (target.ValueRO.TargetEntity == Entity.Null)
                 {
                     ecb.DestroyEntity(entity);
                     continue;
@@ -43,6 +43,7 @@ namespace Systems
                 moveDirection = math.normalize(moveDirection);
 
                 localTransform.ValueRW.Position += moveDirection * bullet.ValueRO.Speed * SystemAPI.Time.DeltaTime;
+
                 //
                 // HIT CHECK
                 //

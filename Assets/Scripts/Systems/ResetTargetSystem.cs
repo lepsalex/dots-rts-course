@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
+    [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     partial struct ResetTargetSystem : ISystem
     {
         [BurstCompile]
@@ -17,8 +17,10 @@ namespace Systems
                 if (target.ValueRO.TargetEntity == Entity.Null)
                     continue;
 
-                // set target to null for target entities that no longer exist
-                if (!SystemAPI.Exists(target.ValueRO.TargetEntity))
+                // set target to null for target entities that no longer
+                // exist, or that will no longer exist later this frame
+                // (we can tell by the missing LocalTransform)
+                if (!SystemAPI.Exists(target.ValueRO.TargetEntity) || !SystemAPI.HasComponent<LocalTransform>(target.ValueRO.TargetEntity))
                 {
                     target.ValueRW.TargetEntity = Entity.Null;
                 }
