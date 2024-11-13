@@ -34,12 +34,14 @@ namespace Systems
                 //
 
                 var targetLocalTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.TargetEntity);
+                var targetShootVictim = SystemAPI.GetComponent<ShootVictim>(target.ValueRO.TargetEntity);
+                var targetPosition = targetLocalTransform.TransformPoint(targetShootVictim.HitLocalPosition);
 
                 // get distance before move to mitigate overshooting problem
-                var distanceBeforeMoveSq = math.distancesq(localTransform.ValueRO.Position, targetLocalTransform.Position);
+                var distanceBeforeMoveSq = math.distancesq(localTransform.ValueRO.Position, targetPosition);
 
                 // move bullet towards target
-                var moveDirection = targetLocalTransform.Position - localTransform.ValueRO.Position;
+                var moveDirection = targetPosition - localTransform.ValueRO.Position;
                 moveDirection = math.normalize(moveDirection);
 
                 localTransform.ValueRW.Position += moveDirection * bullet.ValueRO.Speed * SystemAPI.Time.DeltaTime;
@@ -48,16 +50,16 @@ namespace Systems
                 // HIT CHECK
                 //
 
-                var distanceAfterSq = math.distancesq(localTransform.ValueRO.Position, targetLocalTransform.Position);
+                var distanceAfterSq = math.distancesq(localTransform.ValueRO.Position, targetPosition);
 
                 // Check for target overshoot and move bullet to target position if so
                 if (distanceAfterSq > distanceBeforeMoveSq)
                 {
-                    localTransform.ValueRW.Position = targetLocalTransform.Position;
+                    localTransform.ValueRW.Position = targetPosition;
                 }
 
                 // If not hit, exit here
-                if (math.distancesq(localTransform.ValueRO.Position, targetLocalTransform.Position) > destroyDistanceSq)
+                if (math.distancesq(localTransform.ValueRO.Position, targetPosition) > destroyDistanceSq)
                     continue;
 
                 //
