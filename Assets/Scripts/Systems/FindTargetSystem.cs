@@ -43,6 +43,10 @@ namespace Systems
                 {
                     foreach (var distanceHit in distanceHitList)
                     {
+                        // mitigating a DOTS bug where the entity query returns a result but the entity is destroyed
+                        if (!SystemAPI.Exists(distanceHit.Entity) || !SystemAPI.HasComponent<Unit>(distanceHit.Entity))
+                            continue;
+
                         var targetHit = SystemAPI.GetComponent<Unit>(distanceHit.Entity);
                         if (targetHit.Faction == findTarget.ValueRO.TargetFaction)
                         {
