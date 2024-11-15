@@ -8,6 +8,8 @@ namespace Systems
 {
     internal partial struct UnitMoverSystem : ISystem
     {
+        public const float ReachedTargetPositionDistanceSq = 2f;
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -15,45 +17,40 @@ namespace Systems
             unitMoverJob.ScheduleParallel();
         }
     }
-}
 
-[BurstCompile]
-public partial struct UnitMoverJob : IJobEntity
-{
-    public float DeltaTime;
-
-    void Execute(
-        ref LocalTransform localTransform,
-        ref PhysicsVelocity physicsVelocity,
-        in UnitMover unitMover
-    )
+    [BurstCompile]
+    public partial struct UnitMoverJob : IJobEntity
     {
-        var targetDistance = unitMover.TargetPosition - localTransform.Position;
+        public float DeltaTime;
 
-        // todo: temp solution to stop units jitter on location
-        // note that lengthsq is much more efficient than length
-        // as length first calls lengthsq then does a square root
-        // which is a costly operation!
-        if (math.lengthsq(targetDistance) < 1)
+        void Execute(ref LocalTransform localTransform, ref PhysicsVelocity physicsVelocity, in UnitMover unitMover)
         {
-            physicsVelocity.Linear = float3.zero;
+            var targetDistance = unitMover.TargetPosition - localTransform.Position;
+
+            // note that lengthsq is much more efficient than length
+            // as length first calls lengthsq then does a square root
+            // which is a costly operation!
+            if (math.lengthsq(targetDistance) <= UnitMoverSystem.ReachedTargetPositionDistanceSq)
+            {
+                physicsVelocity.Linear = float3.zero;
+                physicsVelocity.Angular = float3.zero;
+                return;
+            }
+
+            var moveDirection = math.normalize(targetDistance);
+
+            // rotate to face movement direction
+            localTransform.Rotation = math.slerp(
+                localTransform.Rotation,
+                quaternion.LookRotation(moveDirection, math.up()),
+                unitMover.RotationSpeed * DeltaTime
+            );
+
+            // apply physics to move
+            physicsVelocity.Linear = moveDirection * unitMover.MoveSpeed;
+
+            // todo: temp lock rotation until we deal with collisions properly
             physicsVelocity.Angular = float3.zero;
-            return;
         }
-
-        var moveDirection = math.normalize(targetDistance);
-
-        // rotate to face movement direction
-        localTransform.Rotation = math.slerp(
-            localTransform.Rotation,
-            quaternion.LookRotation(moveDirection, math.up()),
-            unitMover.RotationSpeed * DeltaTime
-        );
-
-        // apply physics to move
-        physicsVelocity.Linear = moveDirection * unitMover.MoveSpeed;
-
-        // todo: temp lock rotation until we deal with collisions properly
-        physicsVelocity.Angular = float3.zero;
     }
 }
