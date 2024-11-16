@@ -39,4 +39,11 @@ public struct ShootAttack : IComponentData
     public int DamageAmount;
     public float AttackDistance;
     public float3 BulletSpawnLocalPosition;
+    public OnShootEvent OnShootAttack;
+
+    public struct OnShootEvent
+    {
+        public bool IsTriggered;
+        public float3 ShootFromPosition;
+    }
 }

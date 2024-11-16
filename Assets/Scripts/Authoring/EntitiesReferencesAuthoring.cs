@@ -8,6 +8,7 @@ namespace Authoring
     {
         public GameObject bulletPrefabGameObject;
         public GameObject zombiePrefabGameObject;
+        public GameObject shootLightPrefabGameObject;
 
         public class Baker : Baker<EntitiesReferencesAuthoring>
         {
@@ -20,6 +21,7 @@ namespace Authoring
                     {
                         BulletPrefabEntity = GetEntity(authoring.bulletPrefabGameObject, TransformUsageFlags.Dynamic),
                         ZombiePrefabEntity = GetEntity(authoring.zombiePrefabGameObject, TransformUsageFlags.Dynamic),
+                        ShootLightPrefabEntity = GetEntity(authoring.shootLightPrefabGameObject, TransformUsageFlags.Dynamic),
                     }
                 );
             }
@@ -31,4 +33,5 @@ public struct EntitiesReferences : IComponentData
 {
     public Entity BulletPrefabEntity;
     public Entity ZombiePrefabEntity;
+    public Entity ShootLightPrefabEntity;
 }

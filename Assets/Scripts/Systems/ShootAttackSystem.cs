@@ -8,6 +8,11 @@ namespace Systems
 {
     partial struct ShootAttackSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<EntitiesReferences>();
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -71,6 +76,10 @@ namespace Systems
                 // set bullet target to attack target
                 var bulletTarget = SystemAPI.GetComponentRW<Target>(bulletEntity);
                 bulletTarget.ValueRW.TargetEntity = target.ValueRO.TargetEntity;
+
+                // trigger the OnShootAttack event
+                shootAttack.ValueRW.OnShootAttack.IsTriggered = true;
+                shootAttack.ValueRW.OnShootAttack.ShootFromPosition = bulletSpawnLocation;
             }
         }
     }

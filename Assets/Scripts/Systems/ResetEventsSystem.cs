@@ -1,5 +1,6 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace Systems
 {
@@ -19,6 +20,12 @@ namespace Systems
             foreach (var selected in SystemAPI.Query<RefRW<Health>>())
             {
                 selected.ValueRW.OnHealthChanged = false;
+            }
+            // Reset shoot attack events
+            foreach (var selected in SystemAPI.Query<RefRW<ShootAttack>>())
+            {
+                selected.ValueRW.OnShootAttack.IsTriggered = false;
+                selected.ValueRW.OnShootAttack.ShootFromPosition = float3.zero;
             }
         }
     }
