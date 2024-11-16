@@ -1,7 +1,9 @@
+using Common;
 using MonoBehaviours;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
@@ -38,9 +40,22 @@ namespace Systems
                 // reset hit list
                 distanceHitList.Clear();
 
+                // get info on current target if it exists to manage target swapping
+                var closestTargetDistance = float.MaxValue;
+                var currentTargetDistanceOffset = 0f;
+                if (target.ValueRO.TargetEntity != Entity.Null)
+                {
+                    var targetLocalTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.TargetEntity);
+                    closestTargetDistance = math.distance(localTransform.ValueRO.Position, targetLocalTransform.Position);
+                    currentTargetDistanceOffset = 2f;
+                }
+
                 // check for targets in range and set target component if appropriate
                 if (collisionWorld.OverlapSphere(localTransform.ValueRO.Position, findTarget.ValueRO.Range, ref distanceHitList, collisionFilter))
                 {
+                    // target the closest unit first
+                    distanceHitList.Sort(new DistanceHitDistanceComparer());
+
                     foreach (var distanceHit in distanceHitList)
                     {
                         // mitigating a DOTS bug where the entity query returns a result but the entity is destroyed
@@ -48,12 +63,18 @@ namespace Systems
                             continue;
 
                         var targetHit = SystemAPI.GetComponent<Unit>(distanceHit.Entity);
-                        if (targetHit.Faction == findTarget.ValueRO.TargetFaction)
-                        {
-                            // todo: find CLOSEST target
-                            target.ValueRW.TargetEntity = distanceHit.Entity;
+
+                        // skip targets not of the target faction
+                        if (targetHit.Faction != findTarget.ValueRO.TargetFaction)
+                            continue;
+
+                        // if the current target is within the offset, do not retarget
+                        if (distanceHit.Distance + currentTargetDistanceOffset > closestTargetDistance)
                             break;
-                        }
+
+                        // target the entity at the closest target
+                        target.ValueRW.TargetEntity = distanceHit.Entity;
+                        break;
                     }
                 }
             }
