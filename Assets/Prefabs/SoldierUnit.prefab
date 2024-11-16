@@ -135,7 +135,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2071132403048886252, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       propertyPath: range
-      value: 8
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 2071132403048886252, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       propertyPath: targetFaction

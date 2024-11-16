@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1329041350633508922}
   - component: {fileID: 4248846480574049320}
   - component: {fileID: 7539456587701125283}
+  - component: {fileID: 5983118224174878167}
   - component: {fileID: 6351137319663887620}
   - component: {fileID: 939976931496953678}
   m_Layer: 6
@@ -120,6 +121,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91320077dd1d94086b07b5cb0cbf5788, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5983118224174878167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57119227005061386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6481af4aed6f4c62940ca42b90641db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  loseTargetDistance: 20
 --- !u!136 &6351137319663887620
 CapsuleCollider:
   m_ObjectHideFlags: 0
