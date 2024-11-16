@@ -57,9 +57,7 @@ namespace Systems
                 // only shoot attack  if the timer has elapsed
                 shootAttack.ValueRW.Timer -= SystemAPI.Time.DeltaTime;
                 if (shootAttack.ValueRO.Timer > 0f)
-                {
                     continue;
-                }
 
                 // reset shoot attack timer
                 shootAttack.ValueRW.Timer = shootAttack.ValueRO.TimerMax;
