@@ -69,6 +69,7 @@ namespace Systems
                 // apply damage
                 var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.TargetEntity);
                 targetHealth.ValueRW.CurrentHealth -= bullet.ValueRO.DamageAmount;
+                targetHealth.ValueRW.OnHealthChanged = true;
 
                 // destroy bullet entity
                 ecb.DestroyEntity(entity);
