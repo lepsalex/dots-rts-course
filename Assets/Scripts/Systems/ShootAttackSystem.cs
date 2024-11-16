@@ -19,12 +19,9 @@ namespace Systems
             var entitiesReferences = SystemAPI.GetSingleton<EntitiesReferences>();
 
             foreach (
-                var (localTransform, shootAttack, target, unitMover) in SystemAPI.Query<
-                    RefRW<LocalTransform>,
-                    RefRW<ShootAttack>,
-                    RefRO<Target>,
-                    RefRW<UnitMover>
-                >()
+                var (localTransform, shootAttack, target, unitMover) in SystemAPI
+                    .Query<RefRW<LocalTransform>, RefRW<ShootAttack>, RefRO<Target>, RefRW<UnitMover>>()
+                    .WithDisabled<MoveOverride>()
             )
             {
                 if (target.ValueRO.TargetEntity == Entity.Null)

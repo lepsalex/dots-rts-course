@@ -112,20 +112,22 @@ namespace MonoBehaviours
                 var mouseWorldPosition = MouseWorldPosition.Instance.GetPosition();
 
                 var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-                var entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<UnitMover, Selected>().Build(entityManager);
+                var entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Selected>().WithPresent<MoveOverride>().Build(entityManager);
 
-                var unitMovers = entityQuery.ToComponentDataArray<UnitMover>(Allocator.Temp);
+                var entityArray = entityQuery.ToEntityArray(Allocator.Temp);
+                var moveOverrides = entityQuery.ToComponentDataArray<MoveOverride>(Allocator.Temp);
 
-                var movePositionArray = GenerateMovePositionArray(mouseWorldPosition, unitMovers.Length);
+                var movePositionArray = GenerateMovePositionArray(mouseWorldPosition, moveOverrides.Length);
 
-                for (var i = 0; i < unitMovers.Length; i++)
+                for (var i = 0; i < moveOverrides.Length; i++)
                 {
-                    var unitMover = unitMovers[i];
+                    var unitMover = moveOverrides[i];
                     unitMover.TargetPosition = movePositionArray[i];
-                    unitMovers[i] = unitMover;
+                    moveOverrides[i] = unitMover;
+                    entityManager.SetComponentEnabled<MoveOverride>(entityArray[i], true);
                 }
 
-                entityQuery.CopyFromComponentDataArray(unitMovers);
+                entityQuery.CopyFromComponentDataArray(moveOverrides);
             }
         }
 

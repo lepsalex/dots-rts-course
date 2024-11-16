@@ -22,12 +22,9 @@ namespace Systems
             var raycastHitList = new NativeList<RaycastHit>(Allocator.Temp);
 
             foreach (
-                var (localTransform, meleeAttack, target, unitMover) in SystemAPI.Query<
-                    RefRW<LocalTransform>,
-                    RefRW<MeleeAttack>,
-                    RefRO<Target>,
-                    RefRW<UnitMover>
-                >()
+                var (localTransform, meleeAttack, target, unitMover) in SystemAPI
+                    .Query<RefRW<LocalTransform>, RefRW<MeleeAttack>, RefRO<Target>, RefRW<UnitMover>>()
+                    .WithDisabled<MoveOverride>()
             )
             {
                 if (target.ValueRO.TargetEntity == Entity.Null)
