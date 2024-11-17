@@ -19,9 +19,10 @@ namespace Systems
             var entitiesReferences = SystemAPI.GetSingleton<EntitiesReferences>();
 
             foreach (
-                var (localTransform, shootAttack, target, unitMover) in SystemAPI
+                var (localTransform, shootAttack, target, unitMover, entity) in SystemAPI
                     .Query<RefRW<LocalTransform>, RefRW<ShootAttack>, RefRO<Target>, RefRW<UnitMover>>()
                     .WithDisabled<MoveOverride>()
+                    .WithEntityAccess()
             )
             {
                 if (target.ValueRO.TargetEntity == Entity.Null)
@@ -58,6 +59,13 @@ namespace Systems
 
                 // reset shoot attack timer
                 shootAttack.ValueRW.Timer = shootAttack.ValueRO.TimerMax;
+
+                // enemy target should target the shooter if they don't have an override already
+                var enemyTargetOverride = SystemAPI.GetComponentRW<TargetOverride>(target.ValueRO.TargetEntity);
+                if (enemyTargetOverride.ValueRO.TargetEntity == Entity.Null)
+                {
+                    enemyTargetOverride.ValueRW.TargetEntity = entity;
+                }
 
                 // spawn a bullet
                 var bulletEntity = state.EntityManager.Instantiate(entitiesReferences.BulletPrefabEntity);
