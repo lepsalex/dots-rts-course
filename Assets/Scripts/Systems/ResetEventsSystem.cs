@@ -10,23 +10,39 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            // Reset selection events
-            foreach (var selected in SystemAPI.Query<RefRW<Selected>>().WithPresent<Selected>())
-            {
-                selected.ValueRW.OnDeselected = false;
-                selected.ValueRW.OnSelected = false;
-            }
-            // Reset health events
-            foreach (var selected in SystemAPI.Query<RefRW<Health>>())
-            {
-                selected.ValueRW.OnHealthChanged = false;
-            }
-            // Reset shoot attack events
-            foreach (var selected in SystemAPI.Query<RefRW<ShootAttack>>())
-            {
-                selected.ValueRW.OnShootAttack.IsTriggered = false;
-                selected.ValueRW.OnShootAttack.ShootFromPosition = float3.zero;
-            }
+            new ResetSelectedEventsJob().ScheduleParallel();
+            new ResetHealthEventsJob().ScheduleParallel();
+            new ResetShootAttackEventsJob().ScheduleParallel();
+        }
+    }
+
+    [BurstCompile]
+    [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+    public partial struct ResetSelectedEventsJob : IJobEntity
+    {
+        void Execute(ref Selected selected)
+        {
+            selected.OnDeselected = false;
+            selected.OnSelected = false;
+        }
+    }
+
+    [BurstCompile]
+    public partial struct ResetHealthEventsJob : IJobEntity
+    {
+        void Execute(ref Health health)
+        {
+            health.OnHealthChanged = false;
+        }
+    }
+
+    [BurstCompile]
+    public partial struct ResetShootAttackEventsJob : IJobEntity
+    {
+        void Execute(ref ShootAttack shootAttack)
+        {
+            shootAttack.OnShootAttack.IsTriggered = false;
+            shootAttack.OnShootAttack.ShootFromPosition = float3.zero;
         }
     }
 }
