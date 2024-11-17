@@ -22,7 +22,6 @@ namespace Systems
             _postTransformMatrixComponentLookup = state.GetComponentLookup<PostTransformMatrix>();
         }
 
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var cameraForward = Vector3.zero;
