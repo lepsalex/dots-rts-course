@@ -12,6 +12,11 @@ namespace Systems
 {
     partial struct FindTargetSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<PhysicsWorldSingleton>();
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -25,8 +30,19 @@ namespace Systems
                 CollidesWith = 1u << GameAssets.UnitsLayer, // bit-shift by the layer number
             };
 
-            foreach (var (localTransform, findTarget, target) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<FindTarget>, RefRW<Target>>())
+            foreach (
+                var (localTransform, findTarget, target, targetOverride) in SystemAPI.Query<
+                    RefRO<LocalTransform>,
+                    RefRW<FindTarget>,
+                    RefRW<Target>,
+                    RefRO<TargetOverride>
+                >()
+            )
             {
+                //
+                // Target Timer
+                //
+
                 // only check for targets if the timer has elapsed
                 findTarget.ValueRW.Timer -= SystemAPI.Time.DeltaTime;
                 if (findTarget.ValueRO.Timer > 0f)
@@ -36,6 +52,20 @@ namespace Systems
 
                 // reset target find timer
                 findTarget.ValueRW.Timer = findTarget.ValueRO.TimerMax;
+
+                //
+                // Target Override
+                //
+
+                if (targetOverride.ValueRO.TargetEntity != Entity.Null)
+                {
+                    target.ValueRW.TargetEntity = targetOverride.ValueRO.TargetEntity;
+                    continue;
+                }
+
+                //
+                // Find Target
+                //
 
                 // reset hit list
                 distanceHitList.Clear();

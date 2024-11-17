@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using Common;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -110,12 +112,65 @@ namespace MonoBehaviours
             if (Input.GetMouseButtonDown(1))
             {
                 var mouseWorldPosition = MouseWorldPosition.Instance.GetPosition();
-
                 var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-                var entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Selected>().WithPresent<MoveOverride>().Build(entityManager);
+
+                // check if we are clicking on an enemy unit
+                var entityQuery = entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
+                var physicsWorldSingleton = entityQuery.GetSingleton<PhysicsWorldSingleton>();
+                var collisionWorld = physicsWorldSingleton.CollisionWorld;
+                var cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                var raycastInput = new RaycastInput
+                {
+                    Start = cameraRay.GetPoint(0f),
+                    End = cameraRay.GetPoint(9999f),
+                    Filter = new CollisionFilter
+                    {
+                        GroupIndex = 0,
+                        BelongsTo = ~0u, // flipping 0 with ~ results in every bit being set
+                        CollidesWith = 1u << GameAssets.UnitsLayer, // bit-shift by the layer number
+                    },
+                };
+
+                bool isAttackingSingleTarget = false;
+
+                if (collisionWorld.CastRay(raycastInput, out var raycastHit))
+                {
+                    if (entityManager.HasComponent<Unit>(raycastHit.Entity))
+                    {
+                        var unit = entityManager.GetComponentData<Unit>(raycastHit.Entity);
+                        if (unit.Faction == Faction.Zombie)
+                        {
+                            isAttackingSingleTarget = true;
+
+                            entityQuery = new EntityQueryBuilder(Allocator.Temp)
+                                .WithAll<Selected>()
+                                .WithPresent<TargetOverride, MoveOverride>()
+                                .Build(entityManager);
+                            var targetOverrideEntities = entityQuery.ToEntityArray(Allocator.Temp);
+                            var targetOverrides = entityQuery.ToComponentDataArray<TargetOverride>(Allocator.Temp);
+
+                            for (var i = 0; i < targetOverrides.Length; i++)
+                            {
+                                var targetOverride = targetOverrides[i];
+                                targetOverride.TargetEntity = raycastHit.Entity;
+                                targetOverrides[i] = targetOverride;
+                                entityManager.SetComponentEnabled<MoveOverride>(targetOverrideEntities[i], false);
+                            }
+
+                            entityQuery.CopyFromComponentDataArray(targetOverrides);
+                        }
+                    }
+                }
+
+                // do not process move logic if issuing target override order
+                if (isAttackingSingleTarget)
+                    return;
+
+                entityQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<Selected>().WithPresent<MoveOverride, TargetOverride>().Build(entityManager);
 
                 var entityArray = entityQuery.ToEntityArray(Allocator.Temp);
                 var moveOverrides = entityQuery.ToComponentDataArray<MoveOverride>(Allocator.Temp);
+                var moveTargetOverrides = entityQuery.ToComponentDataArray<TargetOverride>(Allocator.Temp);
 
                 var movePositionArray = GenerateMovePositionArray(mouseWorldPosition, moveOverrides.Length);
 
@@ -125,9 +180,14 @@ namespace MonoBehaviours
                     unitMover.TargetPosition = movePositionArray[i];
                     moveOverrides[i] = unitMover;
                     entityManager.SetComponentEnabled<MoveOverride>(entityArray[i], true);
+
+                    var targetOverride = moveTargetOverrides[i];
+                    targetOverride.TargetEntity = Entity.Null;
+                    moveTargetOverrides[i] = targetOverride;
                 }
 
                 entityQuery.CopyFromComponentDataArray(moveOverrides);
+                entityQuery.CopyFromComponentDataArray(moveTargetOverrides);
             }
         }
 

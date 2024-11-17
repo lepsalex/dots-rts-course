@@ -25,6 +25,18 @@ namespace Systems
                     target.ValueRW.TargetEntity = Entity.Null;
                 }
             }
+
+            // similar logic for target override
+            foreach (var targetOverride in SystemAPI.Query<RefRW<TargetOverride>>())
+            {
+                if (targetOverride.ValueRO.TargetEntity == Entity.Null)
+                    continue;
+
+                if (!SystemAPI.Exists(targetOverride.ValueRO.TargetEntity) || !SystemAPI.HasComponent<LocalTransform>(targetOverride.ValueRO.TargetEntity))
+                {
+                    targetOverride.ValueRW.TargetEntity = Entity.Null;
+                }
+            }
         }
     }
 }
