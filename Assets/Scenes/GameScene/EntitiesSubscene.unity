@@ -179,6 +179,52 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1305376460}
   m_SourcePrefab: {fileID: 100100000, guid: cb049e1163f21401a81bcce697292cb6, type: 3}
+--- !u!1 &438488034
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 438488036}
+  - component: {fileID: 438488035}
+  m_Layer: 0
+  m_Name: AnimationDataHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &438488035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438488034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac849594444bc4ffb80ba62e72ccf110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soldierIdle: {fileID: 11400000, guid: 5acd351784e7e4560aa3e0e555b07fb8, type: 2}
+  soldierWalk: {fileID: 11400000, guid: 84eb1e423febe47ee8a68b0fa58972e7, type: 2}
+--- !u!4 &438488036
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438488034}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &563271706
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -603,6 +649,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1555138946}
+  - {fileID: 438488036}
   - {fileID: 659956382}
   - {fileID: 563271706}
   - {fileID: 1955060980}
