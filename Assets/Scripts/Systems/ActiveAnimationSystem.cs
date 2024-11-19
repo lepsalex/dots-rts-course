@@ -14,7 +14,7 @@ namespace Systems
             state.RequireForUpdate<AnimationDataHolder>();
         }
 
-        // [BurstCompile]
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var animationDataHolder = SystemAPI.GetSingleton<AnimationDataHolder>();
@@ -23,10 +23,10 @@ namespace Systems
             {
                 // testing animation system (todo: remove)
                 if (Input.GetKeyDown(KeyCode.T))
-                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.SoldierIdle;
+                    activeAnimation.ValueRW.NextAnimationType = AnimationDataSO.AnimationType.SoldierIdle;
 
                 if (Input.GetKeyDown(KeyCode.Y))
-                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.SoldierWalk;
+                    activeAnimation.ValueRW.NextAnimationType = AnimationDataSO.AnimationType.SoldierWalk;
 
                 ref var animationData = ref animationDataHolder.AnimationDataBlobArrayBlobAssetReference.Value[
                     (int)activeAnimation.ValueRO.ActiveAnimationType
