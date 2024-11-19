@@ -1,7 +1,9 @@
+using System;
 using ScriptableObjects;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Rendering;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,8 +11,7 @@ namespace Authoring
 {
     public class AnimationDataHolderAuthoring : MonoBehaviour
     {
-        public AnimationDataSO soldierIdle;
-        public AnimationDataSO soldierWalk;
+        public AnimationDataListSO animationDataListSO;
 
         public class Baker : Baker<AnimationDataHolderAuthoring>
         {
@@ -20,57 +21,43 @@ namespace Authoring
                 var entitiesGraphicsSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<EntitiesGraphicsSystem>();
                 var animationDataHolder = new AnimationDataHolder();
 
-                // TODO: refactor to process array
+                var blobBuilder = new BlobBuilder(Allocator.Temp);
 
+                // pass reference otherwise you end up with copies
+                ref var animationDataBlobArray = ref blobBuilder.ConstructRoot<BlobArray<AnimationData>>();
+
+                var animationTypes = System.Enum.GetValues(typeof(AnimationDataSO.AnimationType));
+                var animationDataBlobBuilderArray = blobBuilder.Allocate<AnimationData>(ref animationDataBlobArray, animationTypes.Length);
+
+                int index = 0;
+                foreach (AnimationDataSO.AnimationType animationType in animationTypes)
                 {
-                    var blobBuilder = new BlobBuilder(Allocator.Temp);
+                    var animationDataSO = authoring.animationDataListSO.GetAnimationDataSO(animationType);
+                    var numFrames = animationDataSO.meshArray?.Length ?? 0;
 
-                    // pass reference otherwise you end up with copies
-                    ref var animationData = ref blobBuilder.ConstructRoot<AnimationData>();
-                    animationData.FrameTimerMax = authoring.soldierIdle.FrameTimerMax;
-                    animationData.FrameMax = authoring.soldierIdle.MeshArray.Length;
+                    animationDataBlobBuilderArray[index].FrameTimerMax = animationDataSO.frameTimerMax;
+                    animationDataBlobBuilderArray[index].FrameMax = numFrames;
 
-                    var blobBuilderArray = blobBuilder.Allocate<BatchMeshID>(ref animationData.BatchMeshIdBlobArray, authoring.soldierIdle.MeshArray.Length);
+                    var blobBuilderArray = blobBuilder.Allocate<BatchMeshID>(ref animationDataBlobBuilderArray[index].BatchMeshIdBlobArray, numFrames);
 
-                    for (var i = 0; i < authoring.soldierIdle.MeshArray.Length; i++)
+                    for (var i = 0; i < numFrames; i++)
                     {
-                        var mesh = authoring.soldierIdle.MeshArray[i];
+                        var mesh = animationDataSO.meshArray?[i];
                         blobBuilderArray[i] = entitiesGraphicsSystem.RegisterMesh(mesh);
                     }
 
-                    animationDataHolder.SoldierIdle = blobBuilder.CreateBlobAssetReference<AnimationData>(Allocator.Persistent);
-
-                    // remember to dispose, else memory leak
-                    blobBuilder.Dispose();
-
-                    // register animation so it doesn't get deallocated
-                    AddBlobAsset(ref animationDataHolder.SoldierIdle, out var objectHash);
+                    index++;
                 }
 
-                {
-                    var blobBuilder = new BlobBuilder(Allocator.Temp);
+                animationDataHolder.AnimationDataBlobArrayBlobAssetReference = blobBuilder.CreateBlobAssetReference<BlobArray<AnimationData>>(
+                    Allocator.Persistent
+                );
 
-                    // pass reference otherwise you end up with copies
-                    ref var animationData = ref blobBuilder.ConstructRoot<AnimationData>();
-                    animationData.FrameTimerMax = authoring.soldierWalk.FrameTimerMax;
-                    animationData.FrameMax = authoring.soldierWalk.MeshArray.Length;
+                // remember to dispose, else memory leak
+                blobBuilder.Dispose();
 
-                    var blobBuilderArray = blobBuilder.Allocate<BatchMeshID>(ref animationData.BatchMeshIdBlobArray, authoring.soldierWalk.MeshArray.Length);
-
-                    for (var i = 0; i < authoring.soldierWalk.MeshArray.Length; i++)
-                    {
-                        var mesh = authoring.soldierWalk.MeshArray[i];
-                        blobBuilderArray[i] = entitiesGraphicsSystem.RegisterMesh(mesh);
-                    }
-
-                    animationDataHolder.SoldierWalk = blobBuilder.CreateBlobAssetReference<AnimationData>(Allocator.Persistent);
-
-                    // remember to dispose, else memory leak
-                    blobBuilder.Dispose();
-
-                    // register animation so it doesn't get deallocated
-                    AddBlobAsset(ref animationDataHolder.SoldierWalk, out var objectHash);
-                }
+                // register animations so they don't get deallocated
+                AddBlobAsset(ref animationDataHolder.AnimationDataBlobArrayBlobAssetReference, out var objectHash);
 
                 AddComponent(entity, animationDataHolder);
             }
@@ -80,8 +67,7 @@ namespace Authoring
 
 public struct AnimationDataHolder : IComponentData
 {
-    public BlobAssetReference<AnimationData> SoldierIdle;
-    public BlobAssetReference<AnimationData> SoldierWalk;
+    public BlobAssetReference<BlobArray<AnimationData>> AnimationDataBlobArrayBlobAssetReference;
 }
 
 public struct AnimationData

@@ -1,3 +1,4 @@
+using ScriptableObjects;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Rendering;
@@ -13,39 +14,35 @@ namespace Systems
             state.RequireForUpdate<AnimationDataHolder>();
         }
 
-        [BurstCompile]
+        // [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var animationDataHolder = SystemAPI.GetSingleton<AnimationDataHolder>();
 
             foreach (var (activeAnimation, materialMeshInfo) in SystemAPI.Query<RefRW<ActiveAnimation>, RefRW<MaterialMeshInfo>>())
             {
-                // ensure animation is setup (todo: will be removed for a better solution later)
-                if (!activeAnimation.ValueRO.AnimationDataBlobAssetReference.IsCreated)
-                {
-                    activeAnimation.ValueRW.AnimationDataBlobAssetReference = animationDataHolder.SoldierIdle;
-                }
-
                 // testing animation system (todo: remove)
                 if (Input.GetKeyDown(KeyCode.T))
-                    activeAnimation.ValueRW.AnimationDataBlobAssetReference = animationDataHolder.SoldierIdle;
+                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.SoldierIdle;
 
                 if (Input.GetKeyDown(KeyCode.Y))
-                    activeAnimation.ValueRW.AnimationDataBlobAssetReference = animationDataHolder.SoldierWalk;
+                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.SoldierWalk;
+
+                ref var animationData = ref animationDataHolder.AnimationDataBlobArrayBlobAssetReference.Value[
+                    (int)activeAnimation.ValueRO.ActiveAnimationType
+                ];
 
                 // update animation timer
                 activeAnimation.ValueRW.FrameTimer += SystemAPI.Time.DeltaTime;
 
-                if (activeAnimation.ValueRO.FrameTimer < activeAnimation.ValueRO.AnimationDataBlobAssetReference.Value.FrameTimerMax)
+                if (animationData.FrameMax == 0 || activeAnimation.ValueRO.FrameTimer < animationData.FrameTimerMax)
                     continue;
 
                 // calculate the next frame
-                activeAnimation.ValueRW.Frame = (activeAnimation.ValueRO.Frame + 1) % activeAnimation.ValueRO.AnimationDataBlobAssetReference.Value.FrameMax;
+                activeAnimation.ValueRW.Frame = (activeAnimation.ValueRO.Frame + 1) % animationData.FrameMax;
 
                 // set the animation to the frame
-                materialMeshInfo.ValueRW.MeshID = activeAnimation.ValueRO.AnimationDataBlobAssetReference.Value.BatchMeshIdBlobArray[
-                    activeAnimation.ValueRO.Frame
-                ];
+                materialMeshInfo.ValueRW.MeshID = animationData.BatchMeshIdBlobArray[activeAnimation.ValueRO.Frame];
 
                 // reset timer
                 activeAnimation.ValueRW.FrameTimer = 0f;

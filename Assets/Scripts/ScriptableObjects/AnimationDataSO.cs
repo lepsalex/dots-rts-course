@@ -5,7 +5,15 @@ namespace ScriptableObjects
     [CreateAssetMenu()]
     public class AnimationDataSO : ScriptableObject
     {
-        public Mesh[] MeshArray;
-        public float FrameTimerMax;
+        public enum AnimationType
+        {
+            None,
+            SoldierIdle,
+            SoldierWalk,
+        }
+
+        public AnimationType animationType;
+        public Mesh[] meshArray;
+        public float frameTimerMax;
     }
 }
