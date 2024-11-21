@@ -37,4 +37,5 @@ public struct MeleeAttack : IComponentData
     public int DamageAmount;
     public float AttackDistance;
     public float ColliderSize;
+    public bool OnAttack;
 }

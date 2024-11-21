@@ -13,6 +13,7 @@ namespace Systems
             new ResetSelectedEventsJob().ScheduleParallel();
             new ResetHealthEventsJob().ScheduleParallel();
             new ResetShootAttackEventsJob().ScheduleParallel();
+            new ResetMeleeAttackEventsJob().ScheduleParallel();
         }
     }
 
@@ -43,6 +44,15 @@ namespace Systems
         {
             shootAttack.OnShootAttack.IsTriggered = false;
             shootAttack.OnShootAttack.ShootFromPosition = float3.zero;
+        }
+    }
+
+    [BurstCompile]
+    public partial struct ResetMeleeAttackEventsJob : IJobEntity
+    {
+        void Execute(ref MeleeAttack meleeAttack)
+        {
+            meleeAttack.OnAttack = false;
         }
     }
 }

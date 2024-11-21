@@ -23,7 +23,7 @@ namespace Systems
     {
         public float DeltaTime;
 
-        void Execute(ref LocalTransform localTransform, ref PhysicsVelocity physicsVelocity, in UnitMover unitMover)
+        void Execute(ref LocalTransform localTransform, ref PhysicsVelocity physicsVelocity, ref UnitMover unitMover)
         {
             var targetDistance = unitMover.TargetPosition - localTransform.Position;
 
@@ -34,9 +34,12 @@ namespace Systems
             {
                 physicsVelocity.Linear = float3.zero;
                 physicsVelocity.Angular = float3.zero;
+                unitMover.IsMoving = false;
                 return;
             }
 
+            // set moving true and get move direction
+            unitMover.IsMoving = true;
             var moveDirection = math.normalize(targetDistance);
 
             // rotate to face movement direction

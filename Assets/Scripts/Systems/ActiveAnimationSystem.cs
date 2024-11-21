@@ -21,13 +21,6 @@ namespace Systems
 
             foreach (var (activeAnimation, materialMeshInfo) in SystemAPI.Query<RefRW<ActiveAnimation>, RefRW<MaterialMeshInfo>>())
             {
-                // testing animation system (todo: remove)
-                if (Input.GetKeyDown(KeyCode.T))
-                    activeAnimation.ValueRW.NextAnimationType = AnimationDataSO.AnimationType.SoldierIdle;
-
-                if (Input.GetKeyDown(KeyCode.Y))
-                    activeAnimation.ValueRW.NextAnimationType = AnimationDataSO.AnimationType.SoldierWalk;
-
                 ref var animationData = ref animationDataHolder.AnimationDataBlobArrayBlobAssetReference.Value[
                     (int)activeAnimation.ValueRO.ActiveAnimationType
                 ];
@@ -46,6 +39,18 @@ namespace Systems
 
                 // reset timer
                 activeAnimation.ValueRW.FrameTimer = 0f;
+
+                // handle shoot animation reset (todo: remove this and replace with something more robust)
+                if (activeAnimation.ValueRO is { Frame: 0, ActiveAnimationType: AnimationDataSO.AnimationType.SoldierShoot })
+                {
+                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.None;
+                }
+
+                // handle attack animation reset (todo: remove this and replace with something more robust)
+                if (activeAnimation.ValueRO is { Frame: 0, ActiveAnimationType: AnimationDataSO.AnimationType.ZombieAttack })
+                {
+                    activeAnimation.ValueRW.ActiveAnimationType = AnimationDataSO.AnimationType.None;
+                }
             }
         }
     }

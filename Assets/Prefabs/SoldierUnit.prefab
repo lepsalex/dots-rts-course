@@ -181,6 +181,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4248846480574049320, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
+      propertyPath: maxHealth
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 4798147850573060710, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       propertyPath: visualGameObject
       value: 
@@ -207,6 +211,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 57119227005061386, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1665130947237343613}
+    - targetCorrespondingSourceObject: {fileID: 57119227005061386, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3565927380754990083}
+    - targetCorrespondingSourceObject: {fileID: 57119227005061386, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1929987512357723860}
     - targetCorrespondingSourceObject: {fileID: 4339257391630484445, guid: 11a19b9a7145d4d1f819110946acff6a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7288800983338152439}
@@ -293,3 +303,33 @@ MonoBehaviour:
   damageAmount: 5
   attackDistance: 7
   bulletSpawnPositionTransform: {fileID: 2715935868246109293}
+--- !u!114 &3565927380754990083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8271220504508044830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5859f2f86f4f14d00944bf115c08db2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshGameObject: {fileID: 5637249994970225865}
+--- !u!114 &1929987512357723860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8271220504508044830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eca8a0747ba2a40f6b2a2979a612c426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleAnimationType: 1
+  walkAnimationType: 2
+  attackAnimationType: 4
+  aimAnimationType: 3
+  shootAnimationType: 4

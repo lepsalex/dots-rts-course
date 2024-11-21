@@ -88,6 +88,9 @@ namespace Systems
                 // reset melee attack timer
                 meleeAttack.ValueRW.Timer = meleeAttack.ValueRO.TimerMax;
 
+                // set attack event to true
+                meleeAttack.ValueRW.OnAttack = true;
+
                 // apply damage to the targets health
                 var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.TargetEntity);
                 targetHealth.ValueRW.CurrentHealth -= meleeAttack.ValueRO.DamageAmount;

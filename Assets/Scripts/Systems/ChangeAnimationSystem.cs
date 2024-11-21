@@ -1,3 +1,4 @@
+using ScriptableObjects;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Rendering;
@@ -21,6 +22,14 @@ namespace Systems
             {
                 // skip if next animation is set to the same as the current one
                 if (activeAnimation.ValueRO.NextAnimationType == activeAnimation.ValueRO.ActiveAnimationType)
+                    continue;
+
+                // do not exit shoot animation until its reset (todo: make this more generic)
+                if (activeAnimation.ValueRO.ActiveAnimationType == AnimationDataSO.AnimationType.SoldierShoot)
+                    continue;
+
+                // do not exit zombie attack animation until its reset (todo: make this more generic)
+                if (activeAnimation.ValueRO.ActiveAnimationType == AnimationDataSO.AnimationType.ZombieAttack)
                     continue;
 
                 // reset values

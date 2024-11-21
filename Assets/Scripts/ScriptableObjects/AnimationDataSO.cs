@@ -10,6 +10,15 @@ namespace ScriptableObjects
             None,
             SoldierIdle,
             SoldierWalk,
+            SoldierAim,
+            SoldierShoot,
+            ZombieIdle,
+            ZombieWalk,
+            ZombieAttack,
+            ScoutIdle,
+            ScoutWalk,
+            ScoutAim,
+            ScoutAttack,
         }
 
         public AnimationType animationType;
